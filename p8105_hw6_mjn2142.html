@@ -183,6 +183,10 @@ pre code {
     frace = as.factor(frace),
     malform = as.factor(malform),
     mrace = as.factor(mrace)
+  ) %&gt;% 
+  select(
+    -pnumlbw,
+    -pnumsga
   )</code></pre>
 <pre><code>## Rows: 4342 Columns: 20</code></pre>
 <pre><code>## ── Column specification ────────────────────────────────────────────────────────
@@ -191,6 +195,42 @@ pre code {
 <pre><code>## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div id="model-building" class="section level2">
+<h2>Model Building</h2>
+<pre class="r"><code>birthweight_model1 = lm(bwt ~ wtgain + bhead, data = birthweight_data)
+
+birthweight_model2 = lm(bwt ~ wtgain + fincome, data = birthweight_data)
+
+birthweight_model3 = lm(bwt ~ wtgain + mrace, data = birthweight_data)
+
+birthweight_model4 = lm(bwt ~ wtgain + gaweeks, data = birthweight_data)
+
+birthweight_model1 %&gt;% broom::glance()</code></pre>
+<pre><code>## # A tibble: 1 × 12
+##   r.squared adj.r.squared sigma statistic p.value    df  logLik    AIC    BIC
+##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+## 1     0.571         0.571  336.     2885.       0     2 -31413. 62833. 62859.
+## # … with 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+<pre class="r"><code>birthweight_model2 %&gt;% broom::glance()</code></pre>
+<pre><code>## # A tibble: 1 × 12
+##   r.squared adj.r.squared sigma statistic  p.value    df  logLik    AIC    BIC
+##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+## 1    0.0863        0.0859  490.      205. 9.77e-86     2 -33053. 66114. 66139.
+## # … with 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+<pre class="r"><code>birthweight_model3 %&gt;% broom::glance()</code></pre>
+<pre><code>## # A tibble: 1 × 12
+##   r.squared adj.r.squared sigma statistic   p.value    df  logLik    AIC    BIC
+##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+## 1     0.149         0.148  473.      189. 9.98e-150     4 -32899. 65811. 65849.
+## # … with 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+<pre class="r"><code>birthweight_model4 %&gt;% broom::glance()</code></pre>
+<pre><code>## # A tibble: 1 × 12
+##   r.squared adj.r.squared sigma statistic   p.value    df  logLik    AIC    BIC
+##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+## 1     0.205         0.205  457.      561. 2.78e-217     2 -32750. 65507. 65533.
+## # … with 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+<p>I am interested in how maternal weight gain affects a baby’s weight a birth, so I proposed four models for baby’s birth weight using the mother’s weigth gain plus one other predictor in each case. Of the four, I am going to proceed using birthweight_model1, which used mother’s weight gain and baby’s head circumference as predictors, since that model had the highest R-squared value of 0.571, while the other models had significantly smaller R-squared valued, indicating those models are worse fits at predicting baby birthweight.</p>
 </div>
 
 
