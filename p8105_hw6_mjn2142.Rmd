@@ -156,3 +156,42 @@ bootstrap_weather =
   select(-intercept, -tmin)
 ```
 
+## Bootstrapped Variable Distributions
+
+```{r, message = FALSE}
+bootstrap_r_square_distribution =
+  bootstrap_weather %>% 
+  ggplot(aes(x = r_squared)) +
+  geom_density()
+
+ggsave("bootstrap_r_square_distribution.png")
+knitr::include_graphics("bootstrap_r_square_distribution.png")
+
+bootstrap_log_var_distribution =
+  bootstrap_weather %>% 
+  ggplot(aes(x = log_var)) +
+  geom_density()
+
+ggsave("bootstrap_log_var_distribution.png")
+knitr::include_graphics("bootstrap_log_var_distribution.png")
+```
+
+
+## Bootstrap Quantiles
+
+```{r}
+r_squared_quantiles = bootstrap_weather %>% 
+  group_by(id) %>% 
+  summarize(
+    ci_lower = quantile(r_squared, 0.025),
+    ci_upper = quantile(r_squared, 0.975)
+  )
+
+log_var_quantiles = bootstrap_weather %>% 
+  group_by(id) %>% 
+  summarize(
+    ci_lower = quantile(log_var, 0.025),
+    ci_upper = quantile(log_var, 0.975)
+  )
+```
+
