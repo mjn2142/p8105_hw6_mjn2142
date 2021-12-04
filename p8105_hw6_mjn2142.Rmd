@@ -5,7 +5,7 @@ date: "12/4/2021"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 library(tidyverse)
 library(modelr)
 
@@ -30,7 +30,7 @@ scale_fill_discrete = scale_fill_viridis_d
 
 ## Load and Clean the Birthweight Data
 
-```{r}
+```{r, message = FALSE}
 birthweight_data = read_csv("./birthweight.csv") %>% 
   janitor::clean_names() %>% 
   mutate(
@@ -87,8 +87,9 @@ circ_length_sex_model = lm(bwt ~ bhead * blength + bhead * babysex + blength * b
 
 ## Cross Validation
 
-```{r}
-cv = crossv_mc(birthweight_data, 100) %>% 
+```{r, message = FALSE}
+cv_plot =
+  crossv_mc(birthweight_data, 100) %>% 
   mutate(
     wtgain_bhead = map(train, ~birthweight_model1),
     length_ga  = map(train, ~length_and_ga_model),
@@ -98,6 +99,60 @@ cv = crossv_mc(birthweight_data, 100) %>%
     rmse_wtgain_bhead = map2_dbl(wtgain_bhead, test, ~rmse(model = .x, data = .y)),
     rmse_length_ga = map2_dbl(length_ga, test, ~rmse(model = .x, data = .y)),
     rmse_circ_length_sex = map2_dbl(circ_length_sex, test, ~rmse(model = .x, data = .y))
-          )
+          ) %>% 
+  select(starts_with("rmse")) %>% 
+  pivot_longer(
+    everything(),
+    names_to = "model", 
+    values_to = "rmse",
+    names_prefix = "rmse_") %>% 
+  mutate(model = fct_inorder(model)) %>% 
+  ggplot(aes(x = model, y = rmse)) +
+  geom_violin()
+
+ggsave("cv_plot.png")
+knitr::include_graphics("cv_plot.png")
+```
+
+### Problem 3
+
+## Read in Data
+
+```{r}
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2017-01-01",
+    date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(id, USW00094728 = "CentralPark_NY"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+```
+
+## Bootstrapping
+
+```{r}
+bootstrap_weather = 
+  weather_df %>% 
+  modelr::bootstrap(n = 5000) %>% 
+  mutate(
+    models = map(strap, ~lm(tmax ~ tmin, data = .x)),
+    results1 = map(models, broom::glance),
+    results2 = map(models, broom::tidy)
+    ) %>% 
+  select(-strap, -models) %>% 
+  unnest(results2) %>% 
+  select(-std.error, -statistic, -p.value) %>% 
+  pivot_wider(names_from = term, values_from = estimate) %>% 
+  unnest(results1) %>% 
+  janitor::clean_names() %>% 
+  select(id, r_squared, intercept, tmin) %>% 
+  mutate(
+    log_var = log(intercept * tmin)
+  ) %>% 
+  select(-intercept, -tmin)
 ```
 
