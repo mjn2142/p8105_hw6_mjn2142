@@ -181,14 +181,12 @@ knitr::include_graphics("bootstrap_log_var_distribution.png")
 
 ```{r}
 r_squared_quantiles = bootstrap_weather %>% 
-  group_by(id) %>% 
   summarize(
     ci_lower = quantile(r_squared, 0.025),
     ci_upper = quantile(r_squared, 0.975)
   )
 
 log_var_quantiles = bootstrap_weather %>% 
-  group_by(id) %>% 
   summarize(
     ci_lower = quantile(log_var, 0.025),
     ci_upper = quantile(log_var, 0.975)
