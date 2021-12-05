@@ -71,11 +71,18 @@ resid_vs_fitted_plot = birthweight_data %>%
   add_residuals(birthweight_model1) %>% 
   add_predictions(birthweight_model1) %>% 
   ggplot(aes(x = pred, y = resid)) +
-  geom_point()
+  geom_point() +
+  labs(
+    title = "Model Residuals vs. Fitted Values",
+    x = "Fitted Values",
+    y = "Model Residuals"
+  )
 
 ggsave("resid_vs_fitted_plot.png")
 knitr::include_graphics("resid_vs_fitted_plot.png")
 ```
+
+Plots of model residuals vs. fitted values should show points plotted roughly evenly both above and below 0, which this plot demonstrates, as the plotted points are bound around 0.
 
 ## Two Other Models for Comparison
 
@@ -108,17 +115,24 @@ cv_plot =
     names_prefix = "rmse_") %>% 
   mutate(model = fct_inorder(model)) %>% 
   ggplot(aes(x = model, y = rmse)) +
-  geom_violin()
+  geom_violin() +
+  labs(
+    title = "Violin Plots of RMSE for Different Linear Models of Birth Weight",
+    x = "Model",
+    y = "RMSE"
+  )
 
 ggsave("cv_plot.png")
 knitr::include_graphics("cv_plot.png")
 ```
 
+The cross validation analysis using violion plots of RMSE distribution to compare linear models predicting birth weight shows that the model that uses baby's head circumference, length at birth, and sex (and all of their interactions), performs better than my proposed model as well as that of length and gestational age at predicting birth weight, in terms of RMSE, since the circumference/length/sex model has the smallest RMSE.
+
 ### Problem 3
 
 ## Read in Data
 
-```{r}
+```{r, message = FALSE}
 weather_df = 
   rnoaa::meteo_pull_monitors(
     c("USW00094728"),
@@ -162,7 +176,12 @@ bootstrap_weather =
 bootstrap_r_square_distribution =
   bootstrap_weather %>% 
   ggplot(aes(x = r_squared)) +
-  geom_density()
+  geom_density() +
+  labs(
+    title = "R-Squared Density Distribution",
+    x = "R-Squared",
+    y = "Density"
+  )
 
 ggsave("bootstrap_r_square_distribution.png")
 knitr::include_graphics("bootstrap_r_square_distribution.png")
@@ -170,12 +189,18 @@ knitr::include_graphics("bootstrap_r_square_distribution.png")
 bootstrap_log_var_distribution =
   bootstrap_weather %>% 
   ggplot(aes(x = log_var)) +
-  geom_density()
+  geom_density() +
+  labs(
+    title = "Log(B0*B1) Density Distribution",
+    x = "Log(B0*B1)",
+    y = "Density"
+  )
 
 ggsave("bootstrap_log_var_distribution.png")
 knitr::include_graphics("bootstrap_log_var_distribution.png")
 ```
 
+The density distributions for both r-squared and log(B0*B1) appear to approximately follow a normal distribution.
 
 ## Bootstrap Quantiles
 
@@ -186,10 +211,15 @@ r_squared_quantiles = bootstrap_weather %>%
     ci_upper = quantile(r_squared, 0.975)
   )
 
+knitr::kable(r_squared_quantiles)
+
 log_var_quantiles = bootstrap_weather %>% 
   summarize(
     ci_lower = quantile(log_var, 0.025),
     ci_upper = quantile(log_var, 0.975)
   )
+
+knitr::kable(log_var_quantiles)
 ```
 
+The confidence interval for r-squared is (0.894, 0.927) and the confidence interval for log(B0*B1) is (1.965, 2.059).
